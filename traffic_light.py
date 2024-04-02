@@ -24,11 +24,22 @@ def get_grid(h, v, width, height):
 
     return (h_roads, v_roads)
 
+
+def get_intersections(grid):
+    intersections = []
+    for h in grid[0]:
+        for v in grid[1]:
+            intersections.append([h, v])
+    return intersections
+
+def get_traffic_lights(intersections):
+
+
 def gen_random_entry(grid):
     hv = random.randint(0, 1)
-    road_num = random.randint(0, len(grid[hv])-1)
+    road_num = random.randint(0, len(grid[hv]) - 1)
     hl = random.randint(0, 1)
-    print(hv, road_num, hl)
+    # print(hv, road_num, hl)
     if hv == 0:
         if hl == 0:
             return [0, grid[hv][road_num] + lane_width / 2], "r"
@@ -39,6 +50,14 @@ def gen_random_entry(grid):
             return [grid[hv][road_num] - lane_width / 2, 0], "d"
         elif hl == 1:
             return [grid[hv][road_num] + lane_width / 2, window_height], "u"
+
+
+class TrafficLight:
+    def __init__(self) -> None:
+        self.color = random.choice('red', 'green')
+
+    def update_color(self):
+        self.color = "green" if self.color == "red" else "red"
 
 class Car:
     def __init__(self, screen, grid):
@@ -73,9 +92,13 @@ class Car:
 
 
 grid = get_grid(2, 3, window_width, window_height)
-print(grid)
+# print(grid)
+
+intersections = get_intersections(grid)
+print("Intersections are: ", intersections)
 
 car_group = []
+
 
 def car_spawner():
     car_group.append(Car(screen, grid))
