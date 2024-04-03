@@ -32,7 +32,19 @@ def get_intersections(grid):
             intersections.append([h, v])
     return intersections
 
+
 def get_traffic_lights(intersections):
+    light_group = []
+    for i in intersections:
+        light_group.append(TrafficLight(screen, (i[1] + 20, i[0] + 10)))
+        light_group.append(TrafficLight(screen, (i[1] + 10, i[0] - 20)))
+        light_group.append(TrafficLight(screen, (i[1] - 10, i[0] + 20)))
+        light_group.append(TrafficLight(screen, (i[1] - 20, i[0] - 10)))
+    return light_group
+
+
+def car_spawner():
+    car_group.append(Car(screen, grid))
 
 
 def gen_random_entry(grid):
@@ -53,11 +65,17 @@ def gen_random_entry(grid):
 
 
 class TrafficLight:
-    def __init__(self) -> None:
-        self.color = random.choice('red', 'green')
+    def __init__(self, screen, pos):
+        self.screen = screen
+        self.color = random.choice(["red", "green"])
+        self.pos = pos
+
+    def draw(self):
+        return pygame.draw.circle(self.screen, self.color, self.pos, 3)
 
     def update_color(self):
         self.color = "green" if self.color == "red" else "red"
+
 
 class Car:
     def __init__(self, screen, grid):
@@ -98,10 +116,7 @@ intersections = get_intersections(grid)
 print("Intersections are: ", intersections)
 
 car_group = []
-
-
-def car_spawner():
-    car_group.append(Car(screen, grid))
+light_group = get_traffic_lights(intersections)
 
 
 while running:
@@ -134,6 +149,9 @@ while running:
         car.update_pos()
         car.update_vel()
         car.draw()
+
+    for light in light_group:
+        light.draw()
 
     pygame.display.flip()
     dt = clock.tick(60) / 1000
