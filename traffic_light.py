@@ -78,6 +78,12 @@ class TrafficLight:
     def update_color(self):
         self.color = "green" if self.color == "red" else "red"
 
+    def get_pos(self):
+        return self.pos
+
+    def get_color(self):
+        return self.color
+
 
 class Car:
     def __init__(self, screen, grid):
@@ -99,6 +105,51 @@ class Car:
             self.vel[0] = self.vel[0] + 1 if self.vel[0] < 5 else self.vel[0]
         elif self.direction in ["d", "u"]:
             self.vel[1] = self.vel[1] + 1 if self.vel[1] < 5 else self.vel[1]
+
+        if self.direction == "r":
+            for light in light_group:
+                light_pos = light.get_pos()
+                light_color = light.get_color()
+                if (
+                    light_pos[1] == self.pos[1]
+                    and self.pos[0] <= light_pos[0] - 40
+                    and self.pos[0] >= light_pos[0] - 46
+                    and light_color == "red"
+                ):
+                    self.vel[0] = 0
+        elif self.direction == "l":
+            for light in light_group:
+                light_pos = light.get_pos()
+                light_color = light.get_color()
+                if (
+                    light_pos[1] == self.pos[1]
+                    and self.pos[0] >= light_pos[0] + 40
+                    and self.pos[0] <= light_pos[0] + 46
+                    and light_color == "red"
+                ):
+                    self.vel[0] = 0
+        elif self.direction == "d":
+            for light in light_group:
+                light_pos = light.get_pos()
+                light_color = light.get_color()
+                if (
+                    light_pos[0] == self.pos[0]
+                    and self.pos[1] <= light_pos[1] - 40
+                    and self.pos[1] >= light_pos[1] - 46
+                    and light_color == "red"
+                ):
+                    self.vel[1] = 0
+        elif self.direction == "u":
+            for light in light_group:
+                light_pos = light.get_pos()
+                light_color = light.get_color()
+                if (
+                    light_pos[0] == self.pos[0]
+                    and self.pos[1] >= light_pos[1] + 40
+                    and self.pos[1] <= light_pos[1] + 46
+                    and light_color == "red"
+                ):
+                    self.vel[1] = 0
 
     def update_pos(self):
         if self.direction == "r":
