@@ -36,10 +36,12 @@ def get_intersections(grid):
 def get_traffic_lights(intersections):
     light_group = []
     for i in intersections:
-        light_group.append(TrafficLight(screen, (i[1] + 20, i[0] + 10)))
-        light_group.append(TrafficLight(screen, (i[1] + 10, i[0] - 20)))
-        light_group.append(TrafficLight(screen, (i[1] - 10, i[0] + 20)))
-        light_group.append(TrafficLight(screen, (i[1] - 20, i[0] - 10)))
+        color1 = random.choice(["red", "green"])
+        color2 = "red" if color1 == "green" else "green"
+        light_group.append(TrafficLight(screen, (i[1] + 20, i[0] + 10), color1))
+        light_group.append(TrafficLight(screen, (i[1] + 10, i[0] - 20), color2))
+        light_group.append(TrafficLight(screen, (i[1] - 10, i[0] + 20), color2))
+        light_group.append(TrafficLight(screen, (i[1] - 20, i[0] - 10), color1))
     return light_group
 
 
@@ -65,9 +67,9 @@ def gen_random_entry(grid):
 
 
 class TrafficLight:
-    def __init__(self, screen, pos):
+    def __init__(self, screen, pos, color):
         self.screen = screen
-        self.color = random.choice(["red", "green"])
+        self.color = color
         self.pos = pos
 
     def draw(self):
