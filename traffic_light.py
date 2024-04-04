@@ -6,13 +6,16 @@ window_width, window_height = 1400, 900
 pygame.init()
 screen = pygame.display.set_mode((window_width, window_height))
 clock = pygame.time.Clock()
-running = True
-dt = 0
+max_cars = 100
+max_speed = 4
 rand_adj = 120
 lane_width = 20
-light_intervel = 3000
-car_id = 0
 car_gap = 40
+light_intervel = 5000
+dt = 0
+car_id = 0
+
+running = True
 
 
 def get_grid(h, v, width, height):
@@ -131,12 +134,16 @@ class Car:
             if has_car_blocking:
                 self.vel[0] = self.vel[0] - 1 if self.vel[0] > 0 else self.vel[0]
             else:
-                self.vel[0] = self.vel[0] + 1 if self.vel[0] < 5 else self.vel[0]
+                self.vel[0] = (
+                    self.vel[0] + 1 if self.vel[0] < max_speed else self.vel[0]
+                )
         elif self.direction in ["d", "u"]:
             if has_car_blocking:
                 self.vel[1] = self.vel[1] - 1 if self.vel[1] > 0 else self.vel[1]
             else:
-                self.vel[1] = self.vel[1] + 1 if self.vel[1] < 5 else self.vel[1]
+                self.vel[1] = (
+                    self.vel[1] + 1 if self.vel[1] < max_speed else self.vel[1]
+                )
 
         if self.direction == "r":
             for light in light_group:
@@ -227,7 +234,7 @@ while running:
             screen, "white", (v + lane_width, 0), (v + lane_width, window_height)
         )
 
-    if len(car_group) < 12:
+    if len(car_group) < max_cars:
         car_spawner()
         car_id += 1
 
@@ -241,7 +248,6 @@ while running:
                 car.get_id() > other_car.get_id()
                 and car_direction == other_car.get_direction()
             ):
-                print(car_pos, other_car_pos, car_direction)
                 if (
                     (
                         car_direction == "r"
@@ -268,7 +274,6 @@ while running:
                         and car_pos[1] < other_car_pos[1] + car_gap
                     )
                 ):
-                    print(2)
                     has_car_blocking = True
                     break
         # keep distance based on car vel
