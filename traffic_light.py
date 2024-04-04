@@ -11,6 +11,8 @@ dt = 0
 rand_adj = 120
 lane_width = 20
 light_intervel = 3000
+car_id = 0
+car_gap = 40
 
 
 def get_grid(h, v, width, height):
@@ -56,7 +58,7 @@ def get_traffic_lights(intersections):
 
 
 def car_spawner():
-    car_group.append(Car(screen, grid))
+    car_group.append(Car(screen, grid, car_id))
 
 
 def gen_random_entry(grid):
@@ -100,9 +102,10 @@ class TrafficLight:
 
 
 class Car:
-    def __init__(self, screen, grid):
+    def __init__(self, screen, grid, id):
         self.screen = screen
         self.grid = grid
+        self.id = id
         self.pos, self.direction = gen_random_entry(grid)
         self.vel = [0, 0]
         self.color = random.choice(
@@ -114,11 +117,26 @@ class Car:
             self.screen, self.color, (self.pos[0], self.pos[1]), 10
         )
 
-    def update_vel(self):
+    def get_pos(self):
+        return self.pos
+
+    def get_id(self):
+        return self.id
+
+    def get_direction(self):
+        return self.direction
+
+    def update_vel(self, has_car_blocking):
         if self.direction in ["r", "l"]:
-            self.vel[0] = self.vel[0] + 1 if self.vel[0] < 5 else self.vel[0]
+            if has_car_blocking:
+                self.vel[0] = self.vel[0] - 1 if self.vel[0] > 0 else self.vel[0]
+            else:
+                self.vel[0] = self.vel[0] + 1 if self.vel[0] < 5 else self.vel[0]
         elif self.direction in ["d", "u"]:
-            self.vel[1] = self.vel[1] + 1 if self.vel[1] < 5 else self.vel[1]
+            if has_car_blocking:
+                self.vel[1] = self.vel[1] - 1 if self.vel[1] > 0 else self.vel[1]
+            else:
+                self.vel[1] = self.vel[1] + 1 if self.vel[1] < 5 else self.vel[1]
 
         if self.direction == "r":
             for light in light_group:
@@ -211,10 +229,51 @@ while running:
 
     if len(car_group) < 12:
         car_spawner()
+        car_id += 1
 
     for car in car_group:
+        has_car_blocking = False
+        car_pos = car.get_pos()
+        car_direction = car.get_direction()
+        for other_car in car_group:
+            other_car_pos = other_car.get_pos()
+            if (
+                car.get_id() > other_car.get_id()
+                and car_direction == other_car.get_direction()
+            ):
+                print(car_pos, other_car_pos, car_direction)
+                if (
+                    (
+                        car_direction == "r"
+                        and car_pos[1] == other_car_pos[1]
+                        and car_pos[0] < other_car_pos[0]
+                        and car_pos[0] > other_car_pos[0] - car_gap
+                    )
+                    or (
+                        car_direction == "l"
+                        and car_pos[1] == other_car_pos[1]
+                        and car_pos[0] > other_car_pos[0]
+                        and car_pos[0] < other_car_pos[0] + car_gap
+                    )
+                    or (
+                        car_direction == "d"
+                        and car_pos[0] == other_car_pos[0]
+                        and car_pos[1] < other_car_pos[1]
+                        and car_pos[1] > other_car_pos[1] - car_gap
+                    )
+                    or (
+                        car_direction == "u"
+                        and car_pos[0] == other_car_pos[0]
+                        and car_pos[1] > other_car_pos[1]
+                        and car_pos[1] < other_car_pos[1] + car_gap
+                    )
+                ):
+                    print(2)
+                    has_car_blocking = True
+                    break
+        # keep distance based on car vel
+        car.update_vel(has_car_blocking)
         car.update_pos()
-        car.update_vel()
         car.draw()
 
     for light in light_group:
