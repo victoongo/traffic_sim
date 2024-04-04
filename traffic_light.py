@@ -6,6 +6,8 @@ window_width, window_height = 1400, 900
 pygame.init()
 screen = pygame.display.set_mode((window_width, window_height))
 clock = pygame.time.Clock()
+num_h_roads = 3
+num_v_roads = 4
 max_cars = 100
 max_speed = 4
 rand_adj = 120
@@ -201,7 +203,7 @@ class Car:
             self.pos[1] = self.pos[1] - self.vel[1]
 
 
-grid = get_grid(2, 3, window_width, window_height)
+grid = get_grid(num_h_roads, num_v_roads, window_width, window_height)
 # print(grid)
 
 intersections = get_intersections(grid)
