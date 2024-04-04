@@ -10,6 +10,7 @@ running = True
 dt = 0
 rand_adj = 120
 lane_width = 20
+light_intervel = 3000
 
 
 def get_grid(h, v, width, height):
@@ -38,10 +39,19 @@ def get_traffic_lights(intersections):
     for i in intersections:
         color1 = random.choice(["red", "green"])
         color2 = "red" if color1 == "green" else "green"
-        light_group.append(TrafficLight(screen, (i[1] + 20, i[0] + 10), color1))
-        light_group.append(TrafficLight(screen, (i[1] + 10, i[0] - 20), color2))
-        light_group.append(TrafficLight(screen, (i[1] - 10, i[0] + 20), color2))
-        light_group.append(TrafficLight(screen, (i[1] - 20, i[0] - 10), color1))
+        next_change = pygame.time.get_ticks() + random.randint(1, light_intervel)
+        light_group.append(
+            TrafficLight(screen, (i[1] + 20, i[0] + 10), color1, next_change)
+        )
+        light_group.append(
+            TrafficLight(screen, (i[1] + 10, i[0] - 20), color2, next_change)
+        )
+        light_group.append(
+            TrafficLight(screen, (i[1] - 10, i[0] + 20), color2, next_change)
+        )
+        light_group.append(
+            TrafficLight(screen, (i[1] - 20, i[0] - 10), color1, next_change)
+        )
     return light_group
 
 
@@ -67,16 +77,20 @@ def gen_random_entry(grid):
 
 
 class TrafficLight:
-    def __init__(self, screen, pos, color):
+    def __init__(self, screen, pos, color, next_change):
         self.screen = screen
         self.color = color
         self.pos = pos
+        self.next_change = next_change
 
     def draw(self):
         return pygame.draw.circle(self.screen, self.color, self.pos, 3)
 
     def update_color(self):
-        self.color = "green" if self.color == "red" else "red"
+        current_time = pygame.time.get_ticks()
+        if current_time > self.next_change:
+            self.color = "green" if self.color == "red" else "red"
+            self.next_change = current_time + light_intervel
 
     def get_pos(self):
         return self.pos
@@ -204,6 +218,7 @@ while running:
         car.draw()
 
     for light in light_group:
+        light.update_color()
         light.draw()
 
     pygame.display.flip()
