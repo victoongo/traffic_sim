@@ -2,7 +2,7 @@ import pygame
 import random
 
 window_width, window_height = 1400, 900
-
+# test
 pygame.init()
 screen = pygame.display.set_mode((window_width, window_height))
 clock = pygame.time.Clock()
