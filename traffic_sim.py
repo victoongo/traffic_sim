@@ -50,16 +50,24 @@ def get_traffic_lights(intersections):
         color2 = "red" if color1 == "green" else "green"
         next_change = pg.time.get_ticks() + random.randint(1, light_intervel)
         light_group.append(
-            TrafficLight(screen, (i[1] + 20, i[0] + 10), color1, next_change)
+            TrafficLight(
+                screen, (i[1] + lane_width, i[0] + lane_width / 2), color1, next_change
+            )
         )
         light_group.append(
-            TrafficLight(screen, (i[1] + 10, i[0] - 20), color2, next_change)
+            TrafficLight(
+                screen, (i[1] + lane_width / 2, i[0] - lane_width), color2, next_change
+            )
         )
         light_group.append(
-            TrafficLight(screen, (i[1] - 10, i[0] + 20), color2, next_change)
+            TrafficLight(
+                screen, (i[1] - lane_width / 2, i[0] + lane_width), color2, next_change
+            )
         )
         light_group.append(
-            TrafficLight(screen, (i[1] - 20, i[0] - 10), color1, next_change)
+            TrafficLight(
+                screen, (i[1] - lane_width, i[0] - lane_width / 2), color1, next_change
+            )
         )
     return light_group
 

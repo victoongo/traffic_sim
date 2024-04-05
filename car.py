@@ -13,6 +13,9 @@ rand_adj = constants.rand_adj
 lane_width = constants.lane_width
 car_gap = constants.car_gap
 light_intervel = constants.light_intervel
+car_size = constants.car_size
+stop_distance_near = constants.stop_distance_near
+stop_distance_far = constants.stop_distance_far
 
 
 def gen_random_entry(grid):
@@ -45,7 +48,9 @@ class Car(pg.sprite.Sprite):
         )
 
     def draw(self):
-        return pg.draw.circle(self.screen, self.color, (self.pos[0], self.pos[1]), 10)
+        return pg.draw.circle(
+            self.screen, self.color, (self.pos[0], self.pos[1]), car_size
+        )
 
     def get_pos(self):
         return self.pos
@@ -78,8 +83,8 @@ class Car(pg.sprite.Sprite):
                 light_color = light.get_color()
                 if (
                     light_pos[1] == self.pos[1]
-                    and self.pos[0] <= light_pos[0] - 40
-                    and self.pos[0] >= light_pos[0] - 46
+                    and self.pos[0] <= light_pos[0] - stop_distance_near
+                    and self.pos[0] >= light_pos[0] - stop_distance_far
                     and light_color == "red"
                 ):
                     self.vel[0] = 0
@@ -89,8 +94,8 @@ class Car(pg.sprite.Sprite):
                 light_color = light.get_color()
                 if (
                     light_pos[1] == self.pos[1]
-                    and self.pos[0] >= light_pos[0] + 40
-                    and self.pos[0] <= light_pos[0] + 46
+                    and self.pos[0] >= light_pos[0] + stop_distance_near
+                    and self.pos[0] <= light_pos[0] + stop_distance_far
                     and light_color == "red"
                 ):
                     self.vel[0] = 0
@@ -100,8 +105,8 @@ class Car(pg.sprite.Sprite):
                 light_color = light.get_color()
                 if (
                     light_pos[0] == self.pos[0]
-                    and self.pos[1] <= light_pos[1] - 40
-                    and self.pos[1] >= light_pos[1] - 46
+                    and self.pos[1] <= light_pos[1] - stop_distance_near
+                    and self.pos[1] >= light_pos[1] - stop_distance_far
                     and light_color == "red"
                 ):
                     self.vel[1] = 0
@@ -111,8 +116,8 @@ class Car(pg.sprite.Sprite):
                 light_color = light.get_color()
                 if (
                     light_pos[0] == self.pos[0]
-                    and self.pos[1] >= light_pos[1] + 40
-                    and self.pos[1] <= light_pos[1] + 46
+                    and self.pos[1] >= light_pos[1] + stop_distance_near
+                    and self.pos[1] <= light_pos[1] + stop_distance_far
                     and light_color == "red"
                 ):
                     self.vel[1] = 0
