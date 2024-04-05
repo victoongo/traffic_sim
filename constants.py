@@ -1,0 +1,10 @@
+window_width = 1400
+window_height = 900
+num_h_roads = 3
+num_v_roads = 4
+max_cars = 100
+max_speed = 4
+rand_adj = 120
+lane_width = 20
+car_gap = 40
+light_intervel = 5000
