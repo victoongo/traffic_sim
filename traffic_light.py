@@ -1,11 +1,12 @@
-import pygame
+import pygame as pg
 import random
 
 window_width, window_height = 1400, 900
 
-pygame.init()
-screen = pygame.display.set_mode((window_width, window_height))
-clock = pygame.time.Clock()
+pg.init()
+screen = pg.display.set_mode((window_width, window_height))
+clock = pg.time.Clock()
+traffic_area = pg.Rect(0, 0, window_width, window_height)
 num_h_roads = 3
 num_v_roads = 4
 max_cars = 100
@@ -46,7 +47,7 @@ def get_traffic_lights(intersections):
     for i in intersections:
         color1 = random.choice(["red", "green"])
         color2 = "red" if color1 == "green" else "green"
-        next_change = pygame.time.get_ticks() + random.randint(1, light_intervel)
+        next_change = pg.time.get_ticks() + random.randint(1, light_intervel)
         light_group.append(
             TrafficLight(screen, (i[1] + 20, i[0] + 10), color1, next_change)
         )
@@ -62,10 +63,6 @@ def get_traffic_lights(intersections):
     return light_group
 
 
-def car_spawner():
-    car_group.append(Car(screen, grid, car_id))
-
-
 def gen_random_entry(grid):
     hv = random.randint(0, 1)
     road_num = random.randint(0, len(grid[hv]) - 1)
@@ -73,14 +70,14 @@ def gen_random_entry(grid):
     # print(hv, road_num, hl)
     if hv == 0:
         if hl == 0:
-            return [0, grid[hv][road_num] + lane_width / 2], "r"
+            return [1, grid[hv][road_num] + lane_width / 2], "r"
         elif hl == 1:
-            return [window_width, grid[hv][road_num] - lane_width / 2], "l"
+            return [window_width - 1, grid[hv][road_num] - lane_width / 2], "l"
     elif hv == 1:
         if hl == 0:
-            return [grid[hv][road_num] - lane_width / 2, 0], "d"
+            return [grid[hv][road_num] - lane_width / 2, 1], "d"
         elif hl == 1:
-            return [grid[hv][road_num] + lane_width / 2, window_height], "u"
+            return [grid[hv][road_num] + lane_width / 2, window_height - 1], "u"
 
 
 class TrafficLight:
@@ -91,10 +88,10 @@ class TrafficLight:
         self.next_change = next_change
 
     def draw(self):
-        return pygame.draw.circle(self.screen, self.color, self.pos, 3)
+        return pg.draw.circle(self.screen, self.color, self.pos, 3)
 
     def update_color(self):
-        current_time = pygame.time.get_ticks()
+        current_time = pg.time.get_ticks()
         if current_time > self.next_change:
             self.color = "green" if self.color == "red" else "red"
             self.next_change = current_time + light_intervel
@@ -106,9 +103,11 @@ class TrafficLight:
         return self.color
 
 
-class Car:
-    def __init__(self, screen, grid, id):
+class Car(pg.sprite.Sprite):
+    def __init__(self, screen, traffic_area, grid, id):
+        super().__init__()
         self.screen = screen
+        self.traffic_area = traffic_area
         self.grid = grid
         self.id = id
         self.pos, self.direction = gen_random_entry(grid)
@@ -118,9 +117,7 @@ class Car:
         )
 
     def draw(self):
-        return pygame.draw.circle(
-            self.screen, self.color, (self.pos[0], self.pos[1]), 10
-        )
+        return pg.draw.circle(self.screen, self.color, (self.pos[0], self.pos[1]), 10)
 
     def get_pos(self):
         return self.pos
@@ -202,42 +199,51 @@ class Car:
         if self.direction == "u":
             self.pos[1] = self.pos[1] - self.vel[1]
 
+    def update(self):
+        if not (0 <= self.pos[0] <= window_width and 0 <= self.pos[1] <= window_height):
+            self.kill()
+
 
 grid = get_grid(num_h_roads, num_v_roads, window_width, window_height)
 # print(grid)
 
 intersections = get_intersections(grid)
 print("Intersections are: ", intersections)
-
-car_group = []
 light_group = get_traffic_lights(intersections)
 
 
+def car_spawner(car_id):
+    car_group.add(Car(screen, traffic_area, grid, car_id))
+
+
+car_group = pg.sprite.Group()
+
+
 while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
             running = False
 
     screen.fill("black")
     for h in grid[0]:
-        pygame.draw.line(screen, "yellow", (0, h), (window_width, h))
-        pygame.draw.line(
+        pg.draw.line(screen, "yellow", (0, h), (window_width, h))
+        pg.draw.line(
             screen, "white", (0, h - lane_width), (window_width, h - lane_width)
         )
-        pygame.draw.line(
+        pg.draw.line(
             screen, "white", (0, h + lane_width), (window_width, h + lane_width)
         )
     for v in grid[1]:
-        pygame.draw.line(screen, "yellow", (v, 0), (v, window_height))
-        pygame.draw.line(
+        pg.draw.line(screen, "yellow", (v, 0), (v, window_height))
+        pg.draw.line(
             screen, "white", (v - lane_width, 0), (v - lane_width, window_height)
         )
-        pygame.draw.line(
+        pg.draw.line(
             screen, "white", (v + lane_width, 0), (v + lane_width, window_height)
         )
 
-    if len(car_group) < max_cars:
-        car_spawner()
+    if len(pg.sprite.Group.sprites(car_group)) < max_cars:
+        car_spawner(car_id)
         car_id += 1
 
     for car in car_group:
@@ -283,10 +289,12 @@ while running:
         car.update_pos()
         car.draw()
 
+    car_group.update()
+
     for light in light_group:
         light.update_color()
         light.draw()
 
-    pygame.display.flip()
+    pg.display.flip()
     dt = clock.tick(60) / 1000
-pygame.quit()
+pg.quit()
